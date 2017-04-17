@@ -1,4 +1,4 @@
-# Relativity Space - Software engineering candidates' homework
+## Relativity Space - Software engineering candidates' homework
 This readme contains problems that candidates can choose to work on as a take home assignment
 
 ### Instructions:
