@@ -6,7 +6,7 @@ This readme contains problems that candidates can choose to work on as a take-ho
 2. choose one of the problems from this repo to solve
     * You can use any language you want but python is recommended
     * Depending on your time and level of enthusiasm about the problem you can choose to do only parts of the problem
-3. Once done send the link to your fork repo back to your interviewer
+3. Once done send the link to your repo back to your interviewer
 
 Open an issue on this repo if you have any questions about the problems.
 
