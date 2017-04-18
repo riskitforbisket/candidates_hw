@@ -23,7 +23,7 @@ The goal of the program is to extract features from a video file
 
 ### Problem 2: STL manipulation
 The goal of the program is to generate a STL file from any given multivariable expression.
-1. The program will take a mathematical expression from command line. The expression will include two variables x and y and supports addition, subtraction, multiplication,, devision, and power function. The expression represents a 3D surface, in which x, y, and result of expression are three cartesian variables.
+1. The program will take a mathematical expression from command line. The expression will include two variables x and y and supports addition, subtraction, multiplication, devision, and power function. The expression represents a 3D surface, in which x, y, and result of expression are three cartesian variables.
 2. Program's task is to output an STL file that corresponds with the expression.
 3. For extra bonus, you can also out put an image of the STL mesh.
 4. The mesh should be fine enough to fairly represent details of the geometry.
