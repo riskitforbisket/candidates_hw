@@ -8,7 +8,7 @@ This readme contains problems that candidates can choose to work on as a take ho
     * Depending on your time and level of enthusiasm about the problem you can choose to do only parts of the problem
 3. Once done send the link to your fork repo back to your interviewer
 
-Open an issue on this repo if you have any questions about the problems
+Open an issue on this repo if you have any questions about the problems.
 
 Adding clarification and description as comments or readme file is welcomed if needed.
 
