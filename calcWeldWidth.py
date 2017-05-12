@@ -4,10 +4,15 @@ import cv2
 #for easy frame visualization
 import matplotlib.pyplot as plt
 
-#im: numpy array, raw video frame
+#im: numpy array, raw video frame, this is RBG image
 #prepIm: numpy array, prepared image ready for bead measurement
 def prepareImage(im):
+    #convert the frame to single channel
+    prepIm = cv2.cvtColor(im, cv2.COLOR_RGB2GRAY)
 
+    #apply gaussian blur to eliminate high frequency noise
+    #kernel size set to 7x7 and sigma set to 1.6 (noticed this give best results through experience)
+    prepIm = cv2.GaussianBlur(prepIm, (7,7), 1.6)
     return prepIm
 
 
@@ -28,8 +33,8 @@ if __name__ == "__main__":
     #while we still get a valid frame
     while ok:
         ok, frame = video.read()
-        print frame.shape
-        plt.imshow(frame)
+        prepIm = prepareImage(frame)
+        plt.imshow(prepIm)
         plt.show()
 
     widthInPixels = measureWeldBead(np.arange(1))
