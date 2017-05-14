@@ -11,7 +11,13 @@
                 * (np.pi/180.0) * cameraDistanceToWeldingPoint
 
     CALIBRATION VARIABLES:
-
+        HIGH_THRESH = Canny high thresholds
+        LOW_THRESH = Canny high thresholds
+        SIGMA = Gaussian blur sigma
+        KERN_SIZE = Size of bluring kernel
+        OUT_FILENAME_ALL = filename for data out of every frame
+        OUT_FILENAME_20HZ = filename for data pulled from list every 20Hz
+        TIME_DELTA = frequency to pull width data
 
     The Problem:
         Calculate welding bead width
