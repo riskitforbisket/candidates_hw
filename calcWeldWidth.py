@@ -1,6 +1,21 @@
 '''
     Author: Daniel Irizarry
 
+    BONUS_NOTE:
+        This program finds the bead with in pixels. IF you desire the output
+        in millimeters I would use this instantaneous field of view projection.
+        This also assumes the camera has been calibrated and run through a
+        dewarping algorithm to remove any lense distortion.
+
+        UnitsDependingOnRangeMeasurement = fieldofView/focalPlaneArraySize \
+                * (np.pi/180.0) * cameraDistanceToWeldingPoint
+
+    CALIBRATION VARIABLES:
+
+
+    The Problem:
+        Calculate welding bead width
+
     The approach:
         After looking at the video I noticed that the bead had a pretty
         distinct dark contrast compared to the top and bottom portions
@@ -33,11 +48,60 @@ from scipy.signal import savgol_filter as sgf
 #for easy frame visualization
 import matplotlib.pyplot as plt
 
+###############################################################################
+#for interval datalogger
+#yanked from SO: http://stackoverflow.com/questions/3393612/run-certain-code-every-n-seconds
+
+import time
+from threading import Event, Thread
+
+class RepeatedTimer:
+
+    """Repeat `function` every `interval` seconds."""
+
+    def __init__(self, interval, function, *args, **kwargs):
+        self.interval = interval
+        self.function = function
+        self.args = args
+        self.kwargs = kwargs
+        self.start = time.time()
+        self.event = Event()
+        self.thread = Thread(target=self._target)
+        self.thread.start()
+
+    def _target(self):
+        while not self.event.wait(self._time):
+            self.function(*self.args, **self.kwargs)
+
+    @property
+    def _time(self):
+        return self.interval - ((time.time() - self.start) % self.interval)
+
+    def stop(self):
+        self.event.set()
+        self.thread.join()
+###############################################################################
+
 #defines for adjustable variabls
 HIGH_THRESH = 40.0      # These were played around with
 LOW_THRESH = 40.0/3.0   #
 SIGMA = 1.6
 KERN_SIZE = 5
+OUT_FILENAME_ALL = "widthPerFrame.csv"
+OUT_FILENAME_20HZ = "widthPerFrame20HZ.csv"
+TIME_DELTA = 0.05 #20Hz
+
+#container for data
+widthOverTime = []
+loggedData = []
+cumulativeTime = 0.0
+
+#function to log data
+def logData():
+    global cumulativeTime
+    cumulativeTime += 0.05
+    loggedData.append((cumulativeTime, widthOverTime[-1]))
+    return
 
 #im: numpy array, raw video frame, this is RBG image
 #prepIm: numpy array, prepared image ready for bead measurement
@@ -60,7 +124,6 @@ def measureWeldBead(im):
     #convert to ture binary and sum along rows
     edgeIm[edgeIm==255] = 1
     rowSums = np.zeros(edgeIm.shape[0])
-    print len(edgeIm[0])
     for i in range(0, edgeIm.shape[0]):
         rowSums[i] = np.sum(edgeIm[i])
     rowSums = sgf(rowSums, 5, 2)
@@ -71,6 +134,7 @@ def measureWeldBead(im):
     row1 = np.where(rowSums==rowSums[:half].max())[0][0]
     row2 = np.where(rowSums==rowSums[half:].max())[0][0]
 
+    #debug visuals
     #plt.plot(rowSums, np.arange(len(rowSums)))
     #plt.show()
     #plt.imshow(edgeIm)
@@ -80,14 +144,30 @@ def measureWeldBead(im):
 if __name__ == "__main__":
     print "Daniel Irizarry - The Best Candidate!"
 
+    #container for data
+    widthOverTime = []
+    cumulativeTime = 0
+
     #open video file and pull the first frame
     video = cv2.VideoCapture("./videos/weld.mp4")
     ok, frame = video.read()
-    widthOverTime = []
+
+    #open file for data logging per frame
+    fp = open(OUT_FILENAME_ALL, "w")
+    fpHz = open(OUT_FILENAME_20HZ, "w")
+    print>>fp,"time,width"
+    print>>fpHz,"time,width"
 
     #while we still get a valid frame
+    count = 0
+
+    #start datalogger and begin the frame processing
+    datalogger = RepeatedTimer(0.05, logData)
+
+    #loop and process frames, no timing limits
     while ok:
 
+        #prepFrame
         prepIm, xMaxLoc, yMaxLoc = prepareImage(frame)
 
         #only send in a portion of the image where the weld track should be
@@ -95,12 +175,20 @@ if __name__ == "__main__":
         #extends to the right of the image. The small y offset is to try to
         # eliminate the intense edge of the welding tip
         widthOverTime.append(measureWeldBead(prepIm[xMaxLoc-30:xMaxLoc+30, yMaxLoc+25:]))
+        print>>fp,str(count) + "," + str(widthOverTime[count])
         ok, frame = video.read()
+        count += 1
 
+    #stop logger, write logged data to file, release video resources, close file.
+    datalogger.stop()
+    for data in loggedData:
+        print>>fpHz,str(data[0]) + "," + str(data[1])
     video.release()
-    print widthOverTime
+    fp.close()
+    fpHz.close()
+
+    #visualize the measurements over time
     print "AVERAGE WELD WIDTH IN PIXELS = ", np.mean(widthOverTime)
     plt.plot(np.array(widthOverTime), np.arange(len(widthOverTime)))
+    plt.title("Bead Width In Pixels")
     plt.show()
-
-    #widthInPixels = measureWeldBead(np.arange(1))

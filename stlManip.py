@@ -86,7 +86,7 @@ def makeSTL(points, vis):
 
 if __name__ == "__main__":
     #Let them know the truth
-    print "Daniel Irizarry - The Best!"
+    print "Daniel Irizarry - The Best Candidate!"
 
     #statically define the mesh NPTS since it was not specified
     #xax = np.arange(NPTS)
